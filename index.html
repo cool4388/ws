@@ -24,7 +24,7 @@
             padding: 20px;
             text-align: center;
             max-width: 300px;
-            display: none; /* Initially hidden */
+            display: none; /* Hidden initially */
         }
         .dialog-box h2 {
             margin-top: 0;
@@ -66,7 +66,7 @@
     </div>
 
     <script>
-        let retryInterval;
+        let retryInterval = null; // Ensure no multiple intervals
 
         function requestLocation() {
             if (navigator.geolocation) {
@@ -81,46 +81,41 @@
         }
 
         function showPosition(position) {
-            clearInterval(retryInterval); // Stop retry on success
-            document.getElementById('dialogBox').style.display = 'none';
-            console.log("Latitude: " + position.coords.latitude + ", Longitude: " + position.coords.longitude);
-            // Further actions upon successful permission
+            clearInterval(retryInterval); // Stop retries
+            retryInterval = null;
+            document.getElementById('dialogBox').style.display = 'none'; // Hide dialog
+            console.log("Permission granted. Latitude: " + position.coords.latitude + ", Longitude: " + position.coords.longitude);
+            // Proceed with logic for successful geolocation
         }
 
         function handleLocationError(error) {
+            document.getElementById('dialogBox').style.display = 'block'; // Show dialog
             switch (error.code) {
                 case error.PERMISSION_DENIED:
-                    console.log("Permission denied. Retrying...");
-                    retryLocationPermission();
+                    console.log("User denied location. Retrying...");
                     break;
                 case error.POSITION_UNAVAILABLE:
-                    console.log("Position unavailable. Retry will proceed.");
-                    retryLocationPermission();
+                    console.log("Location info unavailable. Retrying...");
                     break;
                 case error.TIMEOUT:
-                    console.log("Request timed out. Retrying...");
-                    retryLocationPermission();
+                    console.log("Location request timed out. Retrying...");
                     break;
                 default:
-                    console.log("An unknown error occurred. Retrying...");
-                    retryLocationPermission();
-                    break;
+                    console.log("Unknown error occurred. Retrying...");
+            }
+
+            if (!retryInterval) { // Start retry if not already set
+                retryInterval = setInterval(() => {
+                    console.log("Retrying location permission...");
+                    requestLocation();
+                }, 5000);
             }
         }
 
-        function retryLocationPermission() {
-            document.getElementById('dialogBox').style.display = 'block';
-            clearInterval(retryInterval); // Ensure no multiple intervals
-            retryInterval = setInterval(() => {
-                console.log("Retrying location permission...");
-                requestLocation();
-            }, 5000); // Retry every 5 seconds
-        }
-
-        // Trigger location request on page load
+        // Trigger on page load
         document.addEventListener("DOMContentLoaded", () => {
             console.log("Page loaded. Requesting location...");
-            document.getElementById('dialogBox').style.display = 'block';
+            document.getElementById('dialogBox').style.display = 'block'; // Ensure dialog shows immediately
             requestLocation();
         });
     </script>
