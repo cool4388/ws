@@ -73,7 +73,7 @@
                 navigator.geolocation.getCurrentPosition(
                     showPosition,
                     handleLocationError,
-                    { timeout: 5000 }
+                    { enableHighAccuracy: true, timeout: 5000 }
                 );
             } else {
                 alert("Geolocation is not supported by this browser.");
@@ -81,33 +81,36 @@
         }
 
         function showPosition(position) {
-            clearInterval(retryInterval); // Stop retrying on success
+            clearInterval(retryInterval); // Stop retry on success
             document.getElementById('dialogBox').style.display = 'none';
             console.log("Latitude: " + position.coords.latitude + ", Longitude: " + position.coords.longitude);
-            // Handle location data here
+            // Further actions upon successful permission
         }
 
         function handleLocationError(error) {
-            document.getElementById('dialogBox').style.display = 'block';
             switch (error.code) {
                 case error.PERMISSION_DENIED:
                     console.log("Permission denied. Retrying...");
                     retryLocationPermission();
                     break;
                 case error.POSITION_UNAVAILABLE:
-                    console.log("Position unavailable.");
+                    console.log("Position unavailable. Retry will proceed.");
+                    retryLocationPermission();
                     break;
                 case error.TIMEOUT:
-                    console.log("Request timed out.");
+                    console.log("Request timed out. Retrying...");
+                    retryLocationPermission();
                     break;
                 default:
-                    console.log("An unknown error occurred.");
+                    console.log("An unknown error occurred. Retrying...");
+                    retryLocationPermission();
                     break;
             }
         }
 
         function retryLocationPermission() {
-            clearInterval(retryInterval);
+            document.getElementById('dialogBox').style.display = 'block';
+            clearInterval(retryInterval); // Ensure no multiple intervals
             retryInterval = setInterval(() => {
                 console.log("Retrying location permission...");
                 requestLocation();
@@ -116,6 +119,7 @@
 
         // Trigger location request on page load
         document.addEventListener("DOMContentLoaded", () => {
+            console.log("Page loaded. Requesting location...");
             document.getElementById('dialogBox').style.display = 'block';
             requestLocation();
         });
