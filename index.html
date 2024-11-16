@@ -61,61 +61,55 @@
         <div class="dialog-box" id="dialogBox">
             <h2>Permission Needed</h2>
             <p>Please allow location access to chat with nearby strangers.</p>
-            <button class="btn-allow" onclick="requestLocation()">Allow</button>
+            <button class="btn-allow" onclick="manualRequestLocation()">Allow</button>
         </div>
     </div>
 
     <script>
-        let retryInterval = null; // Ensure no multiple intervals
+        let retryCount = 0;
+        const maxRetries = 5; // Maximum retries
+        const retryDelay = 5000; // Retry every 5 seconds
 
-        function requestLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    showPosition,
-                    handleLocationError,
-                    { enableHighAccuracy: true, timeout: 5000 }
-                );
-            } else {
-                alert("Geolocation is not supported by this browser.");
+        async function getLocationPermission() {
+            return new Promise((resolve, reject) => {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 5000
+                    });
+                } else {
+                    reject({ message: "Geolocation is not supported by this browser." });
+                }
+            });
+        }
+
+        async function requestLocation() {
+            try {
+                const position = await getLocationPermission();
+                console.log("Permission granted:", position.coords.latitude, position.coords.longitude);
+                document.getElementById('dialogBox').style.display = 'none'; // Hide dialog
+                retryCount = 0; // Reset retries
+            } catch (error) {
+                console.warn("Location access failed:", error);
+                if (retryCount < maxRetries) {
+                    retryCount++;
+                    console.log(`Retrying (${retryCount}/${maxRetries}) in ${retryDelay / 1000}s...`);
+                    document.getElementById('dialogBox').style.display = 'block'; // Show dialog
+                    setTimeout(requestLocation, retryDelay);
+                } else {
+                    console.error("Max retries reached. Location permission denied.");
+                }
             }
         }
 
-        function showPosition(position) {
-            clearInterval(retryInterval); // Stop retries
-            retryInterval = null;
-            document.getElementById('dialogBox').style.display = 'none'; // Hide dialog
-            console.log("Permission granted. Latitude: " + position.coords.latitude + ", Longitude: " + position.coords.longitude);
-            // Proceed with logic for successful geolocation
+        function manualRequestLocation() {
+            retryCount = 0; // Reset count when manually retried
+            requestLocation();
         }
 
-        function handleLocationError(error) {
-            document.getElementById('dialogBox').style.display = 'block'; // Show dialog
-            switch (error.code) {
-                case error.PERMISSION_DENIED:
-                    console.log("User denied location. Retrying...");
-                    break;
-                case error.POSITION_UNAVAILABLE:
-                    console.log("Location info unavailable. Retrying...");
-                    break;
-                case error.TIMEOUT:
-                    console.log("Location request timed out. Retrying...");
-                    break;
-                default:
-                    console.log("Unknown error occurred. Retrying...");
-            }
-
-            if (!retryInterval) { // Start retry if not already set
-                retryInterval = setInterval(() => {
-                    console.log("Retrying location permission...");
-                    requestLocation();
-                }, 5000);
-            }
-        }
-
-        // Trigger on page load
         document.addEventListener("DOMContentLoaded", () => {
-            console.log("Page loaded. Requesting location...");
-            document.getElementById('dialogBox').style.display = 'block'; // Ensure dialog shows immediately
+            console.log("Page loaded. Starting geolocation request...");
+            document.getElementById('dialogBox').style.display = 'block'; // Ensure visible
             requestLocation();
         });
     </script>
