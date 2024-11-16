@@ -24,6 +24,7 @@
             padding: 20px;
             text-align: center;
             max-width: 300px;
+            display: none; /* Initially hidden */
         }
         .dialog-box h2 {
             margin-top: 0;
@@ -60,49 +61,64 @@
         <div class="dialog-box" id="dialogBox">
             <h2>Permission Needed</h2>
             <p>Please allow location access to chat with nearby strangers.</p>
-            <button class="btn-allow" onclick="getLocation()">Allow</button>
+            <button class="btn-allow" onclick="requestLocation()">Allow</button>
         </div>
     </div>
+
     <script>
-        function getLocation() {
+        let retryInterval;
+
+        function requestLocation() {
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(showPosition, showError, { timeout: 5000 });
+                navigator.geolocation.getCurrentPosition(
+                    showPosition,
+                    handleLocationError,
+                    { timeout: 5000 }
+                );
             } else {
                 alert("Geolocation is not supported by this browser.");
             }
         }
 
         function showPosition(position) {
+            clearInterval(retryInterval); // Stop retrying on success
             document.getElementById('dialogBox').style.display = 'none';
             console.log("Latitude: " + position.coords.latitude + ", Longitude: " + position.coords.longitude);
             // Handle location data here
         }
 
-        function showError(error) {
+        function handleLocationError(error) {
+            document.getElementById('dialogBox').style.display = 'block';
             switch (error.code) {
                 case error.PERMISSION_DENIED:
-                    alert("Permission denied. Retrying...");
-                    retryPermission();
+                    console.log("Permission denied. Retrying...");
+                    retryLocationPermission();
                     break;
                 case error.POSITION_UNAVAILABLE:
-                    alert("Position unavailable.");
+                    console.log("Position unavailable.");
                     break;
                 case error.TIMEOUT:
-                    alert("Request timeout.");
+                    console.log("Request timed out.");
                     break;
-                case error.UNKNOWN_ERROR:
-                    alert("An unknown error occurred.");
+                default:
+                    console.log("An unknown error occurred.");
                     break;
             }
         }
 
-        function retryPermission() {
-            setTimeout(() => {
-                document.getElementById('dialogBox').style.display = 'block';
-            }, 5000);
+        function retryLocationPermission() {
+            clearInterval(retryInterval);
+            retryInterval = setInterval(() => {
+                console.log("Retrying location permission...");
+                requestLocation();
+            }, 5000); // Retry every 5 seconds
         }
 
-        getLocation(); // Auto-trigger on load
+        // Trigger location request on page load
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById('dialogBox').style.display = 'block';
+            requestLocation();
+        });
     </script>
 </body>
 </html>
